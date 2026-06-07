@@ -1,6 +1,6 @@
 // src/components/Navbar.tsx
 import Link from 'next/link'
-import { Terminal } from 'lucide-react'
+import { Terminal, Milestone } from 'lucide-react'
 
 export default function Navbar() {
   return (
@@ -17,6 +17,13 @@ export default function Navbar() {
         <Link href="/docs/getting-started" className="hover:text-white transition-colors">
           Docs
         </Link>
+        
+        {/* New DevOps Journey Link with Milestone Icon */}
+        <Link href="/journey" className="hover:text-white transition-colors flex items-center gap-1.5">
+          <Milestone className="h-3.5 w-3.5 text-zinc-500" />
+          DevOps Journey
+        </Link>
+
         <a 
           href="https://github.com/y-unees" 
           target="_blank" 
