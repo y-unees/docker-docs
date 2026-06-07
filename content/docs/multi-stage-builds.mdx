@@ -1,0 +1,492 @@
+---
+title: Multi-Stage Builds
+description: Learn how to create smaller, faster, and more secure Docker images using multi-stage builds.
+order: 17
+---
+
+# Multi-Stage Builds
+
+One of the most effective ways to optimize Docker images is through multi-stage builds.
+
+Multi-stage builds allow you to separate the build process from the final runtime image, resulting in:
+
+- Smaller image sizes
+- Faster deployments
+- Reduced attack surface
+- Cleaner production environments
+
+For modern applications, multi-stage builds are considered a best practice.
+
+## Why Multi-Stage Builds Matter
+
+Many applications require tools during the build process that are unnecessary at runtime.
+
+For example:
+
+```text
+Application Source Code
+         │
+         ▼
+Build Tools
+├── Node.js
+├── npm
+├── TypeScript
+├── Webpack
+└── Build Dependencies
+         │
+         ▼
+Compiled Application
+```
+
+Once the application is built, those tools are no longer needed.
+
+Without multi-stage builds, they remain inside the final image.
+
+This increases:
+
+- Image size
+- Security risks
+- Storage requirements
+
+## Traditional Docker Build
+
+Consider a frontend application:
+
+```dockerfile
+FROM node:20
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+While functional, this image contains:
+
+- Source files
+- Build dependencies
+- Development tools
+- Runtime dependencies
+
+Everything is packaged together.
+
+## Understanding Multi-Stage Builds
+
+Multi-stage builds introduce multiple `FROM` instructions.
+
+Each stage serves a specific purpose.
+
+Example:
+
+```dockerfile
+FROM node:20 AS builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
+
+Docker copies only the build output into the final image.
+
+The build tools remain behind.
+
+## How Multi-Stage Builds Work
+
+Build stage:
+
+```text
+Source Code
+      │
+      ▼
+Builder Container
+      │
+      ▼
+Compiled Files
+```
+
+Runtime stage:
+
+```text
+Compiled Files
+      │
+      ▼
+Production Image
+```
+
+Only the compiled artifacts are included in the final image.
+
+## Naming Build Stages
+
+Stages can be named for clarity.
+
+Example:
+
+```dockerfile
+FROM node:20 AS builder
+```
+
+Later:
+
+```dockerfile
+COPY --from=builder ...
+```
+
+This makes Dockerfiles easier to read and maintain.
+
+## Frontend Application Example
+
+A React application:
+
+```dockerfile
+FROM node:20 AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=builder /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+Final image contains:
+
+```text
+Nginx
+Built Static Files
+```
+
+It does not contain:
+
+```text
+Node.js
+npm
+Source Code
+```
+
+This significantly reduces image size.
+
+## Node.js API Example
+
+For backend applications:
+
+```dockerfile
+FROM node:20 AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
+
+RUN npm install --omit=dev
+
+CMD ["node", "dist/server.js"]
+```
+
+The final image includes only production dependencies.
+
+## Python Example
+
+A Python application:
+
+```dockerfile
+FROM python:3.12 AS builder
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install \
+    --target=/dependencies \
+    -r requirements.txt
+
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY --from=builder /dependencies /dependencies
+
+COPY . .
+
+CMD ["python", "app.py"]
+```
+
+This keeps runtime images lean and focused.
+
+## Reducing Image Size
+
+Consider:
+
+```text
+Standard Build
+├── Source Code
+├── Build Tools
+├── Dependencies
+└── Runtime
+```
+
+Versus:
+
+```text
+Multi-Stage Build
+├── Runtime
+└── Application
+```
+
+Image reductions of 50–90% are common.
+
+## Security Benefits
+
+Smaller images often mean:
+
+- Fewer packages
+- Fewer vulnerabilities
+- Smaller attack surface
+
+Example:
+
+```text
+Build Dependencies
+├── Compilers
+├── Package Managers
+└── Debugging Tools
+```
+
+These are usually unnecessary in production.
+
+Multi-stage builds remove them automatically.
+
+## Working with Distroless Images
+
+Some teams take optimization even further.
+
+Example:
+
+```dockerfile
+FROM gcr.io/distroless/nodejs20
+```
+
+Distroless images contain only:
+
+- Application runtime
+- Required libraries
+
+No shell.
+
+No package manager.
+
+No unnecessary tools.
+
+This can improve security significantly.
+
+## Debugging Multi-Stage Builds
+
+Build the image:
+
+```bash
+docker build -t my-app .
+```
+
+Verify image size:
+
+```bash
+docker images
+```
+
+Inspect contents:
+
+```bash
+docker run -it my-app sh
+```
+
+If the image lacks a shell, inspect the build stage instead.
+
+## Building a Specific Stage
+
+Docker allows building an individual stage.
+
+Example:
+
+```bash
+docker build \
+  --target builder \
+  -t my-app-builder .
+```
+
+Useful for:
+
+- Debugging
+- Testing build artifacts
+- CI workflows
+
+## Combining with Docker Compose
+
+Compose works normally with multi-stage builds.
+
+Example:
+
+```yaml
+services:
+  app:
+    build:
+      context: .
+```
+
+Docker automatically executes all stages and produces the final image.
+
+No additional configuration is required.
+
+## Common Mistakes
+
+### Copying Too Much
+
+Avoid:
+
+```dockerfile
+COPY . .
+```
+
+without a proper `.dockerignore`.
+
+### Including Development Dependencies
+
+Avoid shipping:
+
+```text
+Testing Libraries
+Debug Tools
+Build Utilities
+```
+
+into production images.
+
+### Forgetting Production Installs
+
+For Node.js:
+
+```dockerfile
+RUN npm install --omit=dev
+```
+
+This removes development-only dependencies.
+
+### Using Large Runtime Images
+
+Prefer:
+
+```dockerfile
+node:20-alpine
+```
+
+instead of:
+
+```dockerfile
+node:20
+```
+
+when appropriate.
+
+## Best Practices
+
+### Separate Build and Runtime
+
+Keep compilation and execution stages independent.
+
+### Use Lightweight Runtime Images
+
+Smaller images improve startup and deployment speed.
+
+### Name Stages Clearly
+
+Examples:
+
+```dockerfile
+AS builder
+AS test
+AS runtime
+```
+
+Clear naming improves maintainability.
+
+### Combine with .dockerignore
+
+Reduce build context whenever possible.
+
+### Scan Final Images
+
+Always inspect production images for vulnerabilities.
+
+## Example Production Workflow
+
+```text
+Source Code
+      │
+      ▼
+Builder Stage
+      │
+      ▼
+Compiled Application
+      │
+      ▼
+Runtime Stage
+      │
+      ▼
+Production Image
+      │
+      ▼
+Docker Hub
+      │
+      ▼
+Deployment
+```
+
+This workflow is commonly used in modern CI/CD pipelines.
+
+## Summary
+
+Multi-stage builds are one of the most powerful Docker optimization techniques.
+
+Benefits include:
+
+- Smaller images
+- Faster deployments
+- Improved security
+- Cleaner runtime environments
+- Reduced storage usage
+
+For production workloads, multi-stage builds should be considered the default approach when building Docker images.

@@ -1,0 +1,92 @@
+---
+title: What is Docker?
+description: Learn what Docker is, how containers work, and why Docker has become the standard for modern application deployment.
+order: 2
+---
+
+# What is Docker?
+
+Docker is an open-source platform that allows developers to package applications and their dependencies into lightweight, portable containers.
+
+Containers ensure that applications run consistently regardless of where they are deployed.
+
+## The Problem Docker Solves
+
+Before Docker, developers frequently encountered issues where an application worked perfectly on one machine but failed on another due to differences in:
+
+* Operating systems
+* Installed software
+* Runtime versions
+* Environment configurations
+
+This led to the classic phrase:
+
+> "It works on my machine."
+
+Docker solves this problem by packaging everything an application needs to run into a single, portable unit.
+
+## What Is a Container?
+
+A container is an isolated environment that contains:
+
+* Application code
+* Runtime dependencies
+* Libraries
+* Configuration files
+* System tools
+
+Containers share the host operating system's kernel, making them lightweight and efficient.
+
+## Containers vs Virtual Machines
+
+| Containers           | Virtual Machines      |
+| -------------------- | --------------------- |
+| Lightweight          | Heavyweight           |
+| Share host OS kernel | Include full guest OS |
+| Fast startup         | Slower startup        |
+| Lower resource usage | Higher resource usage |
+
+## Docker Architecture
+
+Docker consists of three primary components:
+
+### Docker Client
+
+The Docker CLI used to interact with Docker.
+
+```bash
+docker run nginx
+```
+
+### Docker Daemon
+
+The background service responsible for:
+
+* Building images
+* Running containers
+* Managing networks
+* Managing volumes
+
+### Docker Registry
+
+A storage location for Docker images.
+
+Examples include:
+
+* Docker Hub
+* GitHub Container Registry
+* Amazon Elastic Container Registry (ECR)
+
+## Benefits of Docker
+
+Docker provides:
+
+* Consistent environments
+* Faster deployments
+* Improved scalability
+* Simplified onboarding
+* Efficient resource utilization
+
+## Summary
+
+Docker allows developers to package applications and dependencies into portable containers that can run consistently across different environments.

@@ -1,0 +1,478 @@
+---
+title: Docker Compose Essentials
+description: Learn how to manage multi-container applications using Docker Compose.
+order: 10
+---
+
+# Docker Compose Essentials
+
+As applications grow, managing containers individually becomes difficult.
+
+Consider a typical web application:
+
+- Frontend
+- Backend API
+- Database
+
+Running each service manually with `docker run` quickly becomes repetitive and error-prone.
+
+Docker Compose solves this problem by allowing you to define and manage multi-container applications using a single configuration file.
+
+## What is Docker Compose?
+
+Docker Compose is a tool that allows you to define an entire application stack inside a YAML file.
+
+Instead of running multiple commands:
+
+```bash
+docker run ...
+docker run ...
+docker run ...
+```
+
+You can start everything with:
+
+```bash
+docker compose up
+```
+
+Compose automatically handles:
+
+- Networks
+- Service discovery
+- Volumes
+- Environment variables
+- Container lifecycle
+
+## Creating Your First Compose File
+
+Docker Compose uses a file named:
+
+```text
+compose.yaml
+```
+
+A minimal example:
+
+```yaml
+services:
+  app:
+    image: nginx
+    ports:
+      - "8080:80"
+```
+
+Start the application:
+
+```bash
+docker compose up
+```
+
+Docker downloads the image and starts the container.
+
+Visit:
+
+```text
+http://localhost:8080
+```
+
+## Understanding the Structure
+
+A Compose file typically contains:
+
+```yaml
+services:
+  app:
+    image: nginx
+
+volumes:
+
+networks:
+```
+
+### Services
+
+Services define the containers that make up your application.
+
+Example:
+
+```yaml
+services:
+  frontend:
+    image: nginx
+
+  backend:
+    image: node:20
+```
+
+Each service becomes its own container.
+
+## Building Images with Compose
+
+Instead of pulling an image, Compose can build one directly.
+
+```yaml
+services:
+  api:
+    build: .
+```
+
+Compose automatically executes:
+
+```bash
+docker build .
+```
+
+before starting the container.
+
+You can also specify a directory:
+
+```yaml
+services:
+  api:
+    build: ./backend
+```
+
+## Port Mapping
+
+Expose container ports to the host machine.
+
+```yaml
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+```
+
+Format:
+
+```text
+HOST_PORT:CONTAINER_PORT
+```
+
+Example:
+
+```text
+localhost:3000
+        │
+        ▼
+Container Port 3000
+```
+
+## Environment Variables
+
+Applications often require configuration.
+
+```yaml
+services:
+  api:
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+```
+
+You can access these values inside the container.
+
+Example:
+
+```javascript
+process.env.NODE_ENV
+```
+
+## Using Environment Files
+
+Instead of hardcoding values:
+
+```yaml
+environment:
+  DATABASE_URL: postgres://user:pass@db:5432/app
+```
+
+Create a `.env` file:
+
+```env
+DATABASE_URL=postgres://user:pass@db:5432/app
+```
+
+Then reference it:
+
+```yaml
+services:
+  api:
+    env_file:
+      - .env
+```
+
+This keeps sensitive values out of source code.
+
+## Working with Volumes
+
+Volumes allow data to persist after containers are removed.
+
+Example:
+
+```yaml
+services:
+  postgres:
+    image: postgres:16
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+```
+
+Without the volume:
+
+```text
+Container Removed
+        │
+        ▼
+Database Lost
+```
+
+With the volume:
+
+```text
+Container Removed
+        │
+        ▼
+Data Persists
+```
+
+## Service Communication
+
+One of Compose's biggest advantages is automatic networking.
+
+Example:
+
+```yaml
+services:
+  api:
+    build: .
+
+  database:
+    image: postgres
+```
+
+Docker automatically creates a network.
+
+The API can connect to PostgreSQL using:
+
+```text
+database:5432
+```
+
+No manual network configuration is required.
+
+## Multi-Container Example
+
+A simple application stack:
+
+```yaml
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+```
+
+Architecture:
+
+```text
+Browser
+   │
+   ▼
+API Container
+   │
+   ▼
+PostgreSQL Container
+```
+
+## Starting Services
+
+Start all services:
+
+```bash
+docker compose up
+```
+
+Start in the background:
+
+```bash
+docker compose up -d
+```
+
+The `-d` flag runs containers in detached mode.
+
+## Viewing Running Services
+
+Check status:
+
+```bash
+docker compose ps
+```
+
+Example output:
+
+```text
+NAME       STATUS
+api        running
+postgres   running
+```
+
+## Viewing Logs
+
+Display logs from all services:
+
+```bash
+docker compose logs
+```
+
+Follow logs in real time:
+
+```bash
+docker compose logs -f
+```
+
+View logs for a specific service:
+
+```bash
+docker compose logs api
+```
+
+## Stopping Services
+
+Stop the stack:
+
+```bash
+docker compose down
+```
+
+This removes:
+
+- Containers
+- Networks
+
+Volumes remain unless explicitly removed.
+
+Remove everything:
+
+```bash
+docker compose down -v
+```
+
+Use caution when deleting volumes.
+
+## Rebuilding Services
+
+If application code changes:
+
+```bash
+docker compose build
+```
+
+Or rebuild and restart:
+
+```bash
+docker compose up --build
+```
+
+## Common Commands
+
+Start services:
+
+```bash
+docker compose up
+```
+
+Run in background:
+
+```bash
+docker compose up -d
+```
+
+View status:
+
+```bash
+docker compose ps
+```
+
+View logs:
+
+```bash
+docker compose logs
+```
+
+Stop services:
+
+```bash
+docker compose down
+```
+
+Rebuild images:
+
+```bash
+docker compose build
+```
+
+## Best Practices
+
+### Use Compose for Local Development
+
+Compose makes development environments reproducible.
+
+Every developer can start the entire stack with:
+
+```bash
+docker compose up
+```
+
+### Keep Secrets Out of Source Control
+
+Prefer:
+
+```env
+DATABASE_URL=...
+```
+
+over hardcoded credentials.
+
+### Use Named Volumes
+
+For databases and persistent storage:
+
+```yaml
+volumes:
+  postgres-data:
+```
+
+### Separate Services
+
+Avoid combining multiple applications into a single container.
+
+One service should perform one primary responsibility.
+
+## Summary
+
+Docker Compose simplifies multi-container application management.
+
+Key benefits include:
+
+- Single-file application configuration
+- Automatic networking
+- Volume management
+- Environment variable support
+- Simplified container lifecycle management
+
+For most development workflows, Docker Compose becomes the primary way to run containerized applications.

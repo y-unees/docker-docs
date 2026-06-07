@@ -1,0 +1,115 @@
+---
+title: Installing Docker
+description: Install Docker on Windows, macOS, and Linux.
+order: 4
+---
+
+# Installing Docker
+
+This guide covers installing Docker on Windows, macOS, and Linux.
+
+## Verify System Requirements
+
+Docker supports:
+
+* Windows 10 and Windows 11
+* macOS
+* Most Linux distributions
+
+## Installing Docker on Windows
+
+1. Download Docker Desktop.
+2. Run the installer.
+3. Enable WSL2 integration if prompted.
+4. Restart your computer.
+
+Verify the installation:
+
+```bash
+docker --version
+```
+
+Example output:
+
+```bash
+Docker version 27.x.x
+```
+
+## Installing Docker on macOS
+
+1. Download Docker Desktop.
+2. Open the installer package.
+3. Drag Docker into the Applications folder.
+4. Launch Docker Desktop.
+
+Verify the installation:
+
+```bash
+docker --version
+```
+
+## Installing Docker on Ubuntu
+
+Update package repositories:
+
+```bash
+sudo apt update
+```
+
+Install Docker:
+
+```bash
+sudo apt install docker.io -y
+```
+
+Start Docker:
+
+```bash
+sudo systemctl start docker
+```
+
+Enable Docker on boot:
+
+```bash
+sudo systemctl enable docker
+```
+
+Verify installation:
+
+```bash
+docker --version
+```
+
+## Running Your First Container
+
+Test your installation:
+
+```bash
+docker run hello-world
+```
+
+Docker will download the image and display a welcome message if everything is working correctly.
+
+## Common Issues
+
+### Permission Denied
+
+Add your user to the Docker group:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Log out and back in afterward.
+
+### Docker Service Not Running
+
+Start the Docker daemon:
+
+```bash
+sudo systemctl start docker
+```
+
+## Summary
+
+Once Docker is installed and verified, you're ready to build images and run containers.

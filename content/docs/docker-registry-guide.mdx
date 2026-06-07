@@ -1,0 +1,498 @@
+---
+title: Docker Registry Guide
+description: Learn how Docker registries work, how to use private registries, and where to store container images.
+order: 18
+---
+
+# Docker Registry Guide
+
+Docker images become truly useful when they can be shared, distributed, and deployed across multiple environments.
+
+Docker registries provide centralized storage for container images and act as the source of truth for deployments.
+
+Whether you're working on a personal project or managing enterprise infrastructure, understanding registries is an essential Docker skill.
+
+## What is a Docker Registry?
+
+A Docker registry is a service that stores and distributes Docker images.
+
+Think of a registry as a package repository for containers.
+
+Example workflow:
+
+```text
+Build Image
+     │
+     ▼
+Push to Registry
+     │
+     ▼
+Pull from Registry
+     │
+     ▼
+Deploy Anywhere
+```
+
+Instead of rebuilding images on every machine, you build once and distribute through a registry.
+
+## Docker Hub
+
+Docker Hub is Docker's default public registry.
+
+Example:
+
+```bash
+docker pull nginx
+```
+
+Docker automatically downloads:
+
+```text
+docker.io/library/nginx
+```
+
+from Docker Hub.
+
+Docker Hub provides:
+
+- Public repositories
+- Private repositories
+- Automated builds
+- Team collaboration
+- Image versioning
+
+For most beginners, Docker Hub is the first registry they use.
+
+## Registry vs Repository
+
+These terms are often confused.
+
+### Registry
+
+The overall image hosting platform.
+
+Examples:
+
+```text
+Docker Hub
+GitHub Container Registry
+Amazon ECR
+Google Artifact Registry
+Azure Container Registry
+```
+
+### Repository
+
+A collection of image versions.
+
+Example:
+
+```text
+john/my-app
+```
+
+Inside that repository:
+
+```text
+john/my-app:v1.0
+john/my-app:v1.1
+john/my-app:v2.0
+```
+
+Each tag represents a different image version.
+
+## Understanding Image References
+
+A complete image reference looks like:
+
+```text
+registry/repository:tag
+```
+
+Example:
+
+```text
+docker.io/library/nginx:latest
+```
+
+Components:
+
+```text
+docker.io     → Registry
+library/nginx → Repository
+latest        → Tag
+```
+
+Docker often hides the registry portion when using Docker Hub.
+
+## Public Registries
+
+Public registries allow anyone to download images.
+
+Examples:
+
+```text
+Docker Hub
+GitHub Container Registry (GHCR)
+Quay.io
+```
+
+Advantages:
+
+- Easy sharing
+- Community access
+- Open-source distribution
+
+Disadvantages:
+
+- Public visibility
+- Potential rate limits
+- Limited privacy
+
+## Private Registries
+
+Private registries restrict image access.
+
+Common use cases:
+
+- Internal applications
+- Proprietary software
+- Enterprise deployments
+
+Benefits:
+
+- Better security
+- Access control
+- Compliance requirements
+
+Many organizations use private registries exclusively.
+
+## Popular Registry Providers
+
+### Docker Hub
+
+Best for:
+
+- Learning Docker
+- Open-source projects
+- Small teams
+
+### GitHub Container Registry
+
+Best for:
+
+- GitHub-based projects
+- GitHub Actions workflows
+
+Image format:
+
+```text
+ghcr.io/username/project
+```
+
+### Amazon Elastic Container Registry (ECR)
+
+Best for:
+
+- AWS workloads
+- ECS
+- EKS
+
+Image format:
+
+```text
+account-id.dkr.ecr.region.amazonaws.com/my-app
+```
+
+### Azure Container Registry (ACR)
+
+Best for:
+
+- Azure deployments
+- AKS clusters
+
+### Google Artifact Registry
+
+Best for:
+
+- Google Cloud
+- GKE deployments
+
+## Logging Into a Registry
+
+Before pushing images, authenticate.
+
+Example:
+
+```bash
+docker login
+```
+
+For custom registries:
+
+```bash
+docker login registry.example.com
+```
+
+Successful login:
+
+```text
+Login Succeeded
+```
+
+Docker stores credentials locally for future use.
+
+## Pushing Images
+
+Tag the image:
+
+```bash
+docker tag my-app registry.example.com/my-app:v1
+```
+
+Push:
+
+```bash
+docker push registry.example.com/my-app:v1
+```
+
+Docker uploads image layers to the registry.
+
+## Pulling Images
+
+Download an image:
+
+```bash
+docker pull registry.example.com/my-app:v1
+```
+
+Verify:
+
+```bash
+docker images
+```
+
+The image is now available locally.
+
+## Running a Private Registry
+
+Docker provides an official registry image.
+
+Launch a registry:
+
+```bash
+docker run -d \
+  -p 5000:5000 \
+  --name registry \
+  registry:2
+```
+
+Registry endpoint:
+
+```text
+http://localhost:5000
+```
+
+You now have a self-hosted registry.
+
+## Using a Local Registry
+
+Tag an image:
+
+```bash
+docker tag my-app localhost:5000/my-app
+```
+
+Push:
+
+```bash
+docker push localhost:5000/my-app
+```
+
+Pull:
+
+```bash
+docker pull localhost:5000/my-app
+```
+
+Useful for:
+
+- Testing
+- Local development
+- Air-gapped environments
+
+## Image Versioning
+
+Always use meaningful tags.
+
+Avoid relying solely on:
+
+```text
+latest
+```
+
+Prefer:
+
+```text
+v1.0.0
+v1.1.0
+v2.0.0
+```
+
+Benefits:
+
+- Easier rollbacks
+- Predictable deployments
+- Clear release history
+
+## Registry Security
+
+Images should be treated as software artifacts.
+
+Best practices include:
+
+- Require authentication
+- Use HTTPS
+- Scan images regularly
+- Remove outdated images
+- Enforce access controls
+
+Security should apply to both public and private registries.
+
+## Image Scanning
+
+Many registries support vulnerability scanning.
+
+Benefits:
+
+- Detect outdated packages
+- Identify security risks
+- Improve compliance
+
+Scanning should become part of your deployment pipeline.
+
+## Registry Cleanup
+
+Unused images consume storage.
+
+Over time:
+
+```text
+v1.0
+v1.1
+v1.2
+v1.3
+v1.4
+```
+
+may accumulate.
+
+Regular cleanup helps:
+
+- Reduce storage costs
+- Improve organization
+- Simplify maintenance
+
+Always retain important production releases.
+
+## Registries in CI/CD
+
+Most modern pipelines follow this workflow:
+
+```text
+Developer Pushes Code
+          │
+          ▼
+CI Pipeline
+          │
+          ▼
+Build Docker Image
+          │
+          ▼
+Push to Registry
+          │
+          ▼
+Deploy Application
+```
+
+The registry becomes the central source for deployments.
+
+## Common Commands
+
+Login:
+
+```bash
+docker login
+```
+
+Tag image:
+
+```bash
+docker tag my-app my-registry/my-app:v1
+```
+
+Push image:
+
+```bash
+docker push my-registry/my-app:v1
+```
+
+Pull image:
+
+```bash
+docker pull my-registry/my-app:v1
+```
+
+Logout:
+
+```bash
+docker logout
+```
+
+## Best Practices
+
+### Use Versioned Tags
+
+Prefer:
+
+```text
+v1.0.0
+v1.1.0
+v2.0.0
+```
+
+over:
+
+```text
+latest
+```
+
+### Secure Private Registries
+
+Enable authentication and encryption.
+
+### Scan Images
+
+Review vulnerabilities before deployment.
+
+### Automate Publishing
+
+Use CI/CD pipelines whenever possible.
+
+### Remove Unused Images
+
+Maintain a clean registry.
+
+## Summary
+
+Docker registries provide centralized storage and distribution for container images.
+
+Key concepts include:
+
+- Registries store images
+- Repositories organize versions
+- Tags identify releases
+- Public and private registries serve different needs
+- Registries integrate naturally with CI/CD workflows
+
+Whether you use Docker Hub, GitHub Container Registry, Amazon ECR, or a self-hosted solution, registries are a critical part of modern container-based deployments.

@@ -1,0 +1,130 @@
+---
+title: Docker Volumes
+description: Persist application data using Docker volumes and bind mounts.
+order: 8
+---
+
+# Docker Volumes
+
+Containers are designed to be temporary. When a container is removed, any data stored inside it is typically lost.
+
+Docker volumes solve this problem by providing persistent storage.
+
+## Why Volumes Matter
+
+Imagine running a database container.
+
+Without a volume:
+
+```text
+Container Deleted
+↓
+Database Deleted
+```
+
+With a volume:
+
+```text
+Container Deleted
+↓
+Data Remains Safe
+```
+
+This makes volumes essential for:
+
+* Databases
+* Uploaded files
+* Application state
+* Logs
+
+## Creating a Volume
+
+Create a named volume:
+
+```bash
+docker volume create app-data
+```
+
+View available volumes:
+
+```bash
+docker volume ls
+```
+
+Inspect a volume:
+
+```bash
+docker volume inspect app-data
+```
+
+## Using a Volume
+
+Mount a volume into a container:
+
+```bash
+docker run \
+  -v app-data:/data \
+  nginx
+```
+
+Docker automatically creates the volume if it does not exist.
+
+## Example: PostgreSQL
+
+```bash
+docker run -d \
+  --name postgres-db \
+  -e POSTGRES_PASSWORD=secret \
+  -v postgres-data:/var/lib/postgresql/data \
+  postgres
+```
+
+Even if the container is removed, the database files remain stored in the volume.
+
+## Bind Mounts
+
+A bind mount connects a local directory to a container directory.
+
+Example:
+
+```bash
+docker run \
+  -v $(pwd):/app \
+  node:20
+```
+
+Changes on your host machine become immediately available inside the container.
+
+## Volumes vs Bind Mounts
+
+| Feature                     | Volumes | Bind Mounts     |
+| --------------------------- | ------- | --------------- |
+| Managed by Docker           | Yes     | No              |
+| Portable                    | Yes     | Depends on host |
+| Preferred for production    | Yes     | Usually No      |
+| Great for local development | Good    | Excellent       |
+
+## Removing Volumes
+
+Delete a volume:
+
+```bash
+docker volume rm app-data
+```
+
+Remove unused volumes:
+
+```bash
+docker volume prune
+```
+
+## Best Practices
+
+* Use named volumes for databases.
+* Use bind mounts during development.
+* Avoid storing important data inside containers.
+* Regularly back up production volumes.
+
+## Summary
+
+Volumes provide persistent storage that survives container removal and are critical for stateful applications such as databases and file storage systems.

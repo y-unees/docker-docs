@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply text-zinc-400 bg-zinc-950 antialiased selection:bg-blue-500/20 selection:text-blue-200 tracking-tight;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Hide scrollbars globally but allow scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Premium Typography Engine for Document Rendering */
+@utility markdown-content {
+  /* Headings with exact tracking and weights */
+  h1 { @apply text-3xl md:text-4xl font-extrabold text-white tracking-tight mt-2 mb-4; }
+  h2 { @apply text-xl font-bold text-zinc-100 tracking-tight mt-10 mb-4 border-b border-zinc-900 pb-2 flex items-center gap-2; }
+  h3 { @apply text-lg font-semibold text-zinc-200 tracking-tight mt-6 mb-3; }
+  
+  /* Text and structure elements */
+  p { @apply text-zinc-300 leading-7 mb-5 text-[15px] font-normal; }
+  hr { @apply border-zinc-900 my-8; }
+  
+  /* Formatted links inside documentation content */
+  a:not(.anchor) { 
+    @apply text-blue-400 font-medium underline underline-offset-4 decoration-blue-500/30 hover:text-blue-300 hover:decoration-blue-400 transition-colors; 
+  }
+  
+  /* Lists styling */
+  ul { @apply list-disc list-inside space-y-2.5 mb-5 pl-5 text-zinc-300 text-[15px]; }
+  ol { @apply list-decimal list-inside space-y-2.5 mb-5 pl-5 text-zinc-300 text-[15px]; }
+  li { @apply leading-7; }
+  
+  /* Inline code highlighting blocks */
+  :not(pre) > code {
+    @apply bg-zinc-900 text-zinc-200 font-mono text-[13px] px-1.5 py-0.5 rounded border border-zinc-800/80 mx-0.5 font-medium;
+  }
+  
+  /* Sleek modern Code Block Layout wrappers with native custom scrollbars */
+  pre {
+    @apply bg-zinc-900/60 border border-zinc-900 rounded-xl p-5 my-5 overflow-x-auto shadow-xl font-mono text-[13.5px] leading-6 text-zinc-300;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-zinc-800) transparent;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-zinc-800);
+      border-radius: 9999px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: var(--color-zinc-700);
+    }
+  }
+  
+  /* Advanced Table structures */
+  table {
+    @apply w-full text-left border-collapse my-8 text-[14px];
+  }
+  thead {
+    @apply border-b border-zinc-800 bg-zinc-900/40;
+  }
+  th {
+    @apply p-3.5 font-semibold text-zinc-200 tracking-wide;
+  }
+  tbody tr {
+    @apply border-b border-zinc-900/60 hover:bg-zinc-900/20 transition-colors;
+  }
+  td {
+    @apply p-3.5 text-zinc-400 font-mono text-[13px] max-w-xs truncate;
+  }
+  
+  /* Inline semantic formatting overrides */
+  strong {
+    @apply font-semibold text-zinc-100;
+  }
+  blockquote {
+    @apply border-l-2 border-blue-500 bg-blue-500/5 p-4 rounded-r-xl my-6 text-zinc-300 text-[14.5px] italic;
+  }
 }

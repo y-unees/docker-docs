@@ -1,0 +1,174 @@
+---
+title: Writing Your First Dockerfile
+description: Learn how to create Docker images using Dockerfiles and understand the most common instructions.
+order: 6
+---
+
+# Writing Your First Dockerfile
+
+A Dockerfile is a text file containing instructions used to build a Docker image.
+
+Think of a Dockerfile as a recipe. Docker follows each instruction step-by-step and produces a reusable image that can be deployed anywhere.
+
+## What Is a Dockerfile?
+
+A Dockerfile defines:
+
+* The base image
+* Application dependencies
+* Working directories
+* Environment variables
+* Startup commands
+
+Example:
+
+```dockerfile
+FROM node:20
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+## Understanding Dockerfile Instructions
+
+### FROM
+
+Every Dockerfile starts with a base image.
+
+```dockerfile
+FROM node:20
+```
+
+Docker downloads the image if it does not already exist locally.
+
+### WORKDIR
+
+Sets the working directory inside the container.
+
+```dockerfile
+WORKDIR /app
+```
+
+All future commands run from this location.
+
+### COPY
+
+Copies files from your host machine into the image.
+
+```dockerfile
+COPY . .
+```
+
+You can also copy specific files:
+
+```dockerfile
+COPY package.json .
+```
+
+### RUN
+
+Executes commands while building the image.
+
+```dockerfile
+RUN npm install
+```
+
+Common uses:
+
+* Installing dependencies
+* Updating packages
+* Compiling source code
+
+### EXPOSE
+
+Documents which port the application uses.
+
+```dockerfile
+EXPOSE 3000
+```
+
+This does not publish the port automatically.
+
+### CMD
+
+Defines the default command executed when the container starts.
+
+```dockerfile
+CMD ["npm", "start"]
+```
+
+Only one CMD instruction should exist in a Dockerfile.
+
+## Building the Image
+
+Navigate to your project directory and run:
+
+```bash
+docker build -t my-app:v1 .
+```
+
+Docker reads the Dockerfile and creates an image.
+
+Verify:
+
+```bash
+docker images
+```
+
+## Running the Image
+
+Start a container:
+
+```bash
+docker run -p 3000:3000 my-app:v1
+```
+
+Your application should now be accessible through your browser.
+
+## Best Practices
+
+### Use Specific Versions
+
+Avoid:
+
+```dockerfile
+FROM node:latest
+```
+
+Prefer:
+
+```dockerfile
+FROM node:20
+```
+
+### Reduce Image Size
+
+Use lightweight base images when possible:
+
+```dockerfile
+FROM node:20-alpine
+```
+
+### Leverage Layer Caching
+
+Copy dependency files first:
+
+```dockerfile
+COPY package*.json ./
+RUN npm install
+```
+
+This improves rebuild performance.
+
+## Summary
+
+Dockerfiles provide a repeatable way to package applications and dependencies into portable images that can run consistently across environments.

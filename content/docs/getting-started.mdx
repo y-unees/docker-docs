@@ -1,0 +1,200 @@
+---
+title: Introduction to Containers
+description: Understand what containers are, why they exist, and how they simplify modern application development.
+order: 1
+---
+
+# Introduction to Containers
+
+Modern applications rarely run in a single environment.
+
+A project may be developed on a laptop, tested on a staging server, and eventually deployed to cloud infrastructure. Historically, differences between these environments often led to one of the most common frustrations in software development:
+
+> "It works on my machine."
+
+Containers were created to solve this problem.
+
+By packaging an application together with its dependencies and runtime requirements, containers provide a consistent environment that behaves the same regardless of where it runs.
+
+---
+
+## What is a Container?
+
+A container is a lightweight, isolated environment used to run applications.
+
+It bundles together everything an application needs to execute, including:
+
+* Application code
+* Runtime dependencies
+* System libraries
+* Configuration files
+* Supporting tools
+
+Because all required components travel with the application, containers help eliminate environment-related inconsistencies.
+
+A container can run on:
+
+* A developer workstation
+* A testing environment
+* A virtual server
+* A cloud platform
+* A Kubernetes cluster
+
+while maintaining the same behavior across each environment.
+
+---
+
+## Why Containers Matter
+
+Before containers became popular, deploying applications often involved manually configuring servers and installing dependencies.
+
+This frequently resulted in issues such as:
+
+* Missing packages
+* Version conflicts
+* Environment inconsistencies
+* Difficult onboarding processes
+
+Containers address these challenges by providing a repeatable and portable execution environment.
+
+Benefits include:
+
+### Consistency
+
+Applications behave the same across development, testing, and production.
+
+### Portability
+
+Containers can run anywhere a compatible container runtime is available.
+
+### Isolation
+
+Applications run independently from one another, reducing conflicts.
+
+### Scalability
+
+Containers can be started, stopped, and replicated quickly to meet demand.
+
+### Efficiency
+
+Containers use fewer resources than traditional virtual machines.
+
+---
+
+## Containers vs Virtual Machines
+
+Containers and Virtual Machines (VMs) both provide isolation, but they achieve it in different ways.
+
+### Virtual Machines
+
+Virtual Machines include an entire operating system for each instance.
+
+```text
+Application
+Dependencies
+Guest Operating System
+----------------------
+Hypervisor
+Host Operating System
+Hardware
+```
+
+Advantages:
+
+* Strong isolation
+* Supports multiple operating systems on the same host
+
+Disadvantages:
+
+* Larger disk usage
+* Higher memory consumption
+* Slower startup times
+
+---
+
+### Containers
+
+Containers share the host operating system kernel while keeping applications isolated from one another.
+
+```text
+Application
+Dependencies
+----------------------
+Container Runtime
+Host Operating System
+Hardware
+```
+
+Advantages:
+
+* Lightweight
+* Fast startup times
+* Efficient resource usage
+* Easier scaling
+
+Disadvantages:
+
+* All containers share the host kernel
+* Isolation is generally weaker than a full virtual machine
+
+---
+
+## How Containers Fit Into Modern Development
+
+Today, containers are widely used throughout the software development lifecycle.
+
+A common workflow looks like this:
+
+```text
+Develop Application
+        │
+        ▼
+Package Into Container
+        │
+        ▼
+Test Locally
+        │
+        ▼
+Deploy Anywhere
+```
+
+This approach helps teams maintain consistency across multiple environments and simplifies deployments.
+
+---
+
+## What You'll Learn Next
+
+This documentation is designed to guide you from fundamental concepts to practical Docker workflows.
+
+Topics include:
+
+* Installing Docker
+* Understanding Images and Containers
+* Writing Dockerfiles
+* Managing Volumes
+* Container Networking
+* Docker Compose
+* Environment Variables
+* Security Best Practices
+* Image Registries
+* Monitoring and Troubleshooting
+
+Each section builds upon the previous one, helping you develop a complete understanding of containerized applications.
+
+---
+
+## Summary
+
+Containers provide a standardized way to package and run applications.
+
+They offer:
+
+* Consistent environments
+* Faster deployments
+* Better portability
+* Improved scalability
+* Efficient resource usage
+
+Understanding containers is the first step toward mastering Docker and modern application deployment practices.
+
+In the next section, we'll install Docker and prepare your environment for building and running containers.

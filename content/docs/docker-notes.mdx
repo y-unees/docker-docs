@@ -1,0 +1,216 @@
+---
+title: Docker CLI Overview
+description: An introduction to the Docker Command Line Interface and the commands you'll encounter throughout this documentation.
+order: 3
+---
+
+# Docker CLI Overview
+
+The Docker Command Line Interface (CLI) is the primary way developers interact with Docker.
+
+Throughout this documentation, you'll use the CLI to:
+
+* Build images
+* Run containers
+* Manage networks
+* Create volumes
+* Inspect resources
+* Troubleshoot applications
+
+While Docker Desktop provides a graphical interface, understanding the CLI is an essential skill for working with Docker effectively.
+
+---
+
+## Docker Command Structure
+
+Most Docker commands follow a simple structure:
+
+```bash
+docker <resource> <action>
+```
+
+Examples:
+
+```bash
+docker image ls
+```
+
+```bash
+docker container ls
+```
+
+```bash
+docker network ls
+```
+
+```bash
+docker volume ls
+```
+
+This pattern makes Docker commands easy to learn and remember.
+
+---
+
+## Common Docker Resources
+
+Docker organizes commands around several core resources.
+
+### Images
+
+Images are reusable templates used to create containers.
+
+Example commands:
+
+```bash
+docker image ls
+```
+
+```bash
+docker image inspect <image>
+```
+
+---
+
+### Containers
+
+Containers are running instances of images.
+
+Example commands:
+
+```bash
+docker container ls
+```
+
+```bash
+docker container stop <container>
+```
+
+---
+
+### Volumes
+
+Volumes store persistent data outside containers.
+
+Example commands:
+
+```bash
+docker volume ls
+```
+
+```bash
+docker volume inspect <volume>
+```
+
+---
+
+### Networks
+
+Networks allow containers to communicate with one another.
+
+Example commands:
+
+```bash
+docker network ls
+```
+
+```bash
+docker network inspect <network>
+```
+
+---
+
+## Getting Help
+
+Docker provides built-in documentation directly from the terminal.
+
+General help:
+
+```bash
+docker --help
+```
+
+Help for a specific command:
+
+```bash
+docker container --help
+```
+
+Example:
+
+```bash
+docker run --help
+```
+
+This is often the fastest way to explore available options.
+
+---
+
+## Viewing Docker Information
+
+Check your Docker installation:
+
+```bash
+docker version
+```
+
+View system information:
+
+```bash
+docker info
+```
+
+These commands are useful when troubleshooting Docker-related issues.
+
+---
+
+## CLI Naming Conventions
+
+Docker supports both modern and legacy command styles.
+
+Modern style:
+
+```bash
+docker container ls
+```
+
+Legacy style:
+
+```bash
+docker ps
+```
+
+Both commands produce the same result.
+
+Throughout this documentation, you'll encounter both styles since they are commonly used in real-world environments.
+
+---
+
+## What You'll Learn Next
+
+As you progress through these docs, you'll learn how to use the Docker CLI to:
+
+* Build images
+* Run containers
+* Create Dockerfiles
+* Manage storage
+* Configure networking
+* Use Docker Compose
+* Publish images
+* Monitor applications
+
+Each topic introduces commands as they become relevant, making them easier to understand in context.
+
+---
+
+## Summary
+
+The Docker CLI is the foundation of day-to-day Docker usage.
+
+Key takeaways:
+
+* Docker commands follow a consistent structure.
+* Resources such as images, containers, volumes, and networks have dedicated command groups.
+* Built-in help is available through the CLI.
+* Commands will be introduced gradually throughout this documentation.
+
+In the next section, we'll install Docker and verify that your environment is ready for container development.

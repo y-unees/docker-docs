@@ -1,0 +1,141 @@
+---
+title: Docker Concepts Explained
+description: Understand the fundamental building blocks of Docker.
+order: 5
+---
+
+# Docker Concepts Explained
+
+Before building applications with Docker, it's important to understand the core concepts that make up the Docker ecosystem.
+
+## Images
+
+An image is a read-only template used to create containers.
+
+Popular images include:
+
+* nginx
+* ubuntu
+* node
+* redis
+* postgres
+
+View local images:
+
+```bash
+docker images
+```
+
+## Containers
+
+A container is a running instance of an image.
+
+Example:
+
+```bash
+docker run nginx
+```
+
+List running containers:
+
+```bash
+docker ps
+```
+
+## Dockerfile
+
+A Dockerfile contains instructions used to build an image.
+
+Example:
+
+```dockerfile
+FROM node:20
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+
+CMD ["npm", "start"]
+```
+
+Build an image:
+
+```bash
+docker build -t my-app .
+```
+
+## Registries
+
+Registries store and distribute Docker images.
+
+Popular registries:
+
+* Docker Hub
+* GitHub Container Registry
+* Amazon ECR
+
+Pull an image:
+
+```bash
+docker pull nginx
+```
+
+## Volumes
+
+Volumes provide persistent storage for containers.
+
+Without volumes:
+
+* Data is deleted when the container is removed.
+
+With volumes:
+
+* Data survives container recreation.
+
+Create a volume:
+
+```bash
+docker volume create app-data
+```
+
+## Networks
+
+Networks allow containers to communicate with one another.
+
+View available networks:
+
+```bash
+docker network ls
+```
+
+Create a custom network:
+
+```bash
+docker network create app-network
+```
+
+## Putting Everything Together
+
+A typical Docker workflow looks like this:
+
+1. Write a Dockerfile.
+2. Build an image.
+3. Run a container.
+4. Store data using volumes.
+5. Connect services through networks.
+6. Push images to a registry.
+
+## Summary
+
+Docker is built around a few key concepts:
+
+* Images
+* Containers
+* Dockerfiles
+* Registries
+* Volumes
+* Networks
+
+Understanding these fundamentals makes learning advanced Docker topics much easier.

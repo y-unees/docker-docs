@@ -1,0 +1,243 @@
+---
+title: Docker Networking
+description: Learn how containers communicate with each other using Docker networks.
+order: 9
+---
+
+# Docker Networking
+
+Docker networking allows containers to communicate with each other, external services, and the host machine.
+
+When building real-world applications, containers rarely operate alone. A typical setup might include:
+
+- A frontend application
+- A backend API
+- A database server
+
+These services need a reliable way to communicate, and Docker networks provide that functionality.
+
+## Understanding Docker Networks
+
+A Docker network is a virtual network that containers can join.
+
+Containers connected to the same network can communicate using container names rather than IP addresses.
+
+For example:
+
+```text
+frontend
+    │
+    ▼
+backend
+    │
+    ▼
+database
+```
+
+The backend can connect to the database using:
+
+```text
+database:5432
+```
+
+instead of:
+
+```text
+localhost:5432
+```
+
+This works because Docker provides automatic DNS resolution for containers on the same network.
+
+## Viewing Existing Networks
+
+To list all available Docker networks:
+
+```bash
+docker network ls
+```
+
+Example output:
+
+```text
+NETWORK ID     NAME      DRIVER
+abc123         bridge    bridge
+def456         host      host
+ghi789         none      null
+```
+
+## Default Network Types
+
+Docker ships with several built-in network drivers.
+
+### Bridge Network
+
+The default network used by most containers.
+
+```text
+Container A
+      │
+      ▼
+Bridge Network
+      ▲
+      │
+Container B
+```
+
+Containers on the same bridge network can communicate with each other.
+
+### Host Network
+
+Containers share the host machine's network stack.
+
+```bash
+docker run --network host nginx
+```
+
+This removes network isolation and is generally used only in specific scenarios.
+
+### None Network
+
+Disables networking entirely.
+
+```bash
+docker run --network none nginx
+```
+
+The container cannot communicate with external systems or other containers.
+
+## Creating a Custom Network
+
+Custom networks are recommended for multi-container applications.
+
+Create a network:
+
+```bash
+docker network create app-network
+```
+
+Verify it was created:
+
+```bash
+docker network ls
+```
+
+## Running Containers on a Network
+
+Start a PostgreSQL container:
+
+```bash
+docker run -d \
+  --name database \
+  --network app-network \
+  postgres
+```
+
+Start an API container on the same network:
+
+```bash
+docker run -d \
+  --name backend \
+  --network app-network \
+  my-api
+```
+
+Both containers can now communicate directly.
+
+The backend can reach PostgreSQL using:
+
+```text
+database:5432
+```
+
+## Inspecting a Network
+
+To view detailed information about a network:
+
+```bash
+docker network inspect app-network
+```
+
+This command displays:
+
+- Connected containers
+- Network settings
+- Subnets
+- Gateway information
+
+## Connecting Existing Containers
+
+You can attach an existing container to a network.
+
+```bash
+docker network connect app-network backend
+```
+
+To disconnect it:
+
+```bash
+docker network disconnect app-network backend
+```
+
+## Removing a Network
+
+Delete an unused network:
+
+```bash
+docker network rm app-network
+```
+
+Docker will prevent removal if active containers are still connected.
+
+## Best Practices
+
+### Use Custom Networks
+
+Avoid placing all containers on the default bridge network.
+
+Custom networks provide:
+
+- Better isolation
+- Cleaner service discovery
+- Easier troubleshooting
+
+### Use Container Names
+
+Prefer:
+
+```text
+database:5432
+```
+
+Instead of:
+
+```text
+172.17.0.2:5432
+```
+
+Container names remain stable while IP addresses can change.
+
+### Separate Applications
+
+Create dedicated networks for each application stack.
+
+Example:
+
+```text
+frontend-network
+backend-network
+monitoring-network
+```
+
+This improves security and organization.
+
+## Summary
+
+Docker networks enable containers to communicate securely and efficiently.
+
+Key takeaways:
+
+- Containers communicate through networks.
+- Docker provides built-in DNS resolution.
+- Custom networks are recommended for production workloads.
+- Container names should be used instead of IP addresses.
+- Multi-container applications depend heavily on Docker networking.

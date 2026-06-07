@@ -1,0 +1,484 @@
+---
+title: Publishing Images to Docker Hub
+description: Learn how to tag, push, and share Docker images using Docker Hub.
+order: 15
+---
+
+# Publishing Images to Docker Hub
+
+Building Docker images locally is useful during development, but eventually you'll want to share your images with:
+
+- Team members
+- CI/CD pipelines
+- Cloud platforms
+- Production servers
+
+Docker Hub is the most popular public container registry and serves as the default registry for Docker.
+
+This guide explains how to publish your own Docker images to Docker Hub.
+
+## What is Docker Hub?
+
+Docker Hub is a cloud-based registry that stores Docker images.
+
+Think of it as GitHub for container images.
+
+Docker Hub allows you to:
+
+- Store images
+- Share images
+- Download images
+- Manage versions
+- Publish public or private repositories
+
+Example:
+
+```text
+docker.io/nginx
+```
+
+When you run:
+
+```bash
+docker pull nginx
+```
+
+Docker automatically pulls the image from Docker Hub.
+
+## Creating a Docker Hub Account
+
+Before publishing images, create a Docker Hub account.
+
+Choose a username carefully because it becomes part of your image name.
+
+Example:
+
+```text
+username/my-app
+```
+
+Once created, verify that you can sign in through Docker Desktop or the Docker CLI.
+
+## Logging In
+
+Authenticate Docker with your Docker Hub account:
+
+```bash
+docker login
+```
+
+You'll be prompted for:
+
+```text
+Username
+Password
+```
+
+Successful output:
+
+```text
+Login Succeeded
+```
+
+Docker can now push images to your repositories.
+
+## Understanding Image Names
+
+A Docker image name consists of:
+
+```text
+username/repository:tag
+```
+
+Example:
+
+```text
+john/my-app:v1
+```
+
+Breakdown:
+
+| Component | Description |
+|------------|-------------|
+| john | Docker Hub username |
+| my-app | Repository name |
+| v1 | Image tag |
+
+## Building an Image
+
+Build your application image:
+
+```bash
+docker build -t my-app .
+```
+
+Verify:
+
+```bash
+docker images
+```
+
+Example:
+
+```text
+REPOSITORY   TAG
+my-app       latest
+```
+
+The image currently exists only on your local machine.
+
+## Tagging an Image
+
+Before pushing, assign a Docker Hub repository name.
+
+Syntax:
+
+```bash
+docker tag SOURCE_IMAGE TARGET_IMAGE
+```
+
+Example:
+
+```bash
+docker tag my-app username/my-app:latest
+```
+
+Verify:
+
+```bash
+docker images
+```
+
+Example output:
+
+```text
+REPOSITORY             TAG
+my-app                 latest
+username/my-app        latest
+```
+
+Both tags reference the same image.
+
+## Pushing an Image
+
+Upload the image:
+
+```bash
+docker push username/my-app:latest
+```
+
+Docker uploads all image layers to Docker Hub.
+
+Successful output:
+
+```text
+latest: digest: sha256:...
+```
+
+Your image is now available online.
+
+## Viewing Published Images
+
+Visit Docker Hub and navigate to your repository.
+
+You should see:
+
+```text
+my-app
+└── latest
+```
+
+The image can now be pulled by anyone with access.
+
+## Pulling the Image
+
+On another machine:
+
+```bash
+docker pull username/my-app:latest
+```
+
+Verify:
+
+```bash
+docker images
+```
+
+The image is now available locally.
+
+## Running a Published Image
+
+Launch the image:
+
+```bash
+docker run -p 3000:3000 username/my-app:latest
+```
+
+The application starts exactly as it would on the machine where it was built.
+
+This portability is one of Docker's biggest advantages.
+
+## Understanding Tags
+
+Tags identify image versions.
+
+Example:
+
+```text
+username/my-app:v1.0
+username/my-app:v1.1
+username/my-app:v2.0
+```
+
+Instead of constantly overwriting `latest`, versioned tags provide predictable deployments.
+
+## Creating Version Tags
+
+Tag a release:
+
+```bash
+docker tag my-app username/my-app:v1.0.0
+```
+
+Push:
+
+```bash
+docker push username/my-app:v1.0.0
+```
+
+You can maintain multiple versions simultaneously.
+
+## Using the Latest Tag
+
+Many projects use:
+
+```text
+latest
+```
+
+Example:
+
+```bash
+docker push username/my-app:latest
+```
+
+However, production deployments should generally use explicit versions:
+
+```text
+v1.0.0
+v1.1.0
+v2.0.0
+```
+
+Versioned tags make rollbacks easier.
+
+## Updating an Existing Image
+
+After changing application code:
+
+Rebuild:
+
+```bash
+docker build -t my-app .
+```
+
+Retag:
+
+```bash
+docker tag my-app username/my-app:v1.1.0
+```
+
+Push:
+
+```bash
+docker push username/my-app:v1.1.0
+```
+
+The new version becomes available immediately.
+
+## Private Repositories
+
+Docker Hub supports private repositories.
+
+Private repositories:
+
+```text
+Visible to authorized users only
+```
+
+Useful for:
+
+- Internal applications
+- Company projects
+- Proprietary software
+
+Access control can be managed through Docker Hub settings.
+
+## Publishing from CI/CD
+
+Many teams automate image publishing.
+
+Workflow:
+
+```text
+Push Code
+     │
+     ▼
+CI Pipeline
+     │
+     ▼
+Build Image
+     │
+     ▼
+Push to Docker Hub
+```
+
+Common platforms:
+
+- GitHub Actions
+- GitLab CI
+- Jenkins
+- Azure DevOps
+
+This eliminates manual publishing steps.
+
+## Common Commands
+
+Login:
+
+```bash
+docker login
+```
+
+Build image:
+
+```bash
+docker build -t my-app .
+```
+
+Tag image:
+
+```bash
+docker tag my-app username/my-app:latest
+```
+
+Push image:
+
+```bash
+docker push username/my-app:latest
+```
+
+Pull image:
+
+```bash
+docker pull username/my-app:latest
+```
+
+Logout:
+
+```bash
+docker logout
+```
+
+## Best Practices
+
+### Use Version Tags
+
+Prefer:
+
+```text
+v1.0.0
+v1.1.0
+v2.0.0
+```
+
+Instead of relying solely on:
+
+```text
+latest
+```
+
+### Keep Images Small
+
+Smaller images:
+
+- Upload faster
+- Download faster
+- Reduce storage costs
+
+### Scan Images Before Publishing
+
+Review vulnerabilities before pushing production images.
+
+### Publish Stable Releases
+
+Avoid pushing experimental builds to repositories used by others.
+
+### Use Descriptive Repository Names
+
+Good:
+
+```text
+company-api
+frontend-app
+inventory-service
+```
+
+Less helpful:
+
+```text
+app
+test
+project
+```
+
+## Common Mistakes
+
+### Forgetting to Tag
+
+Incorrect:
+
+```bash
+docker push my-app
+```
+
+Correct:
+
+```bash
+docker push username/my-app:latest
+```
+
+### Overwriting Latest
+
+Using only `latest` can make deployments difficult to track.
+
+### Publishing Secrets
+
+Never include:
+
+- API keys
+- Passwords
+- Tokens
+
+inside images.
+
+### Publishing Large Images
+
+Review image size before pushing.
+
+Large images increase deployment time and storage usage.
+
+## Summary
+
+Docker Hub provides a simple way to distribute and share Docker images.
+
+Key concepts include:
+
+- Logging in with Docker Hub
+- Tagging images correctly
+- Using versioned releases
+- Publishing images with `docker push`
+- Downloading images with `docker pull`
+- Managing repositories effectively
+
+Once an image is published, it can be deployed consistently across development, staging, and production environments.

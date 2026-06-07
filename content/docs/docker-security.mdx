@@ -1,0 +1,454 @@
+---
+title: Docker Security
+description: Learn Docker security best practices to build, deploy, and operate containers safely.
+order: 14
+---
+
+# Docker Security
+
+Containers provide isolation, portability, and consistency, but they are not automatically secure.
+
+A containerized application is only as secure as:
+
+- The image it uses
+- The software it contains
+- The permissions it receives
+- The infrastructure it runs on
+
+This guide covers practical Docker security practices that every developer should understand.
+
+## Why Container Security Matters
+
+Containers often run:
+
+- APIs
+- Databases
+- Internal services
+- Production workloads
+
+A vulnerable container can expose:
+
+- Sensitive data
+- Credentials
+- Customer information
+- Internal infrastructure
+
+Security should be considered throughout the container lifecycle.
+
+## Use Trusted Base Images
+
+Always start with official or trusted images.
+
+Good examples:
+
+```dockerfile
+FROM node:20-alpine
+```
+
+```dockerfile
+FROM nginx:alpine
+```
+
+Avoid downloading images from unknown publishers without verification.
+
+Before using an image, consider:
+
+- Who maintains it?
+- Is it regularly updated?
+- Does it have a strong reputation?
+
+## Keep Images Updated
+
+Security vulnerabilities are discovered regularly.
+
+Rebuild images frequently:
+
+```bash
+docker compose build --no-cache
+```
+
+Pull updated base images:
+
+```bash
+docker pull node:20-alpine
+```
+
+Outdated images may contain known vulnerabilities.
+
+## Avoid Running Containers as Root
+
+By default, many containers run as the root user.
+
+Example:
+
+```dockerfile
+FROM node:20
+
+CMD ["npm", "start"]
+```
+
+A better approach:
+
+```dockerfile
+FROM node:20
+
+USER node
+
+CMD ["npm", "start"]
+```
+
+Benefits:
+
+- Reduced attack surface
+- Limited permissions
+- Better containment
+
+Running as a non-root user is one of the most important container security practices.
+
+## Limit Container Capabilities
+
+Containers do not always need full system privileges.
+
+Avoid:
+
+```bash
+docker run --privileged my-app
+```
+
+The `--privileged` flag grants extensive access to the host system.
+
+Use only the permissions required by the application.
+
+Principle:
+
+```text
+Least Privilege
+```
+
+Applications should receive only the permissions they need.
+
+## Protect Secrets
+
+Avoid embedding secrets inside:
+
+- Dockerfiles
+- Source code
+- Compose files
+
+Bad:
+
+```dockerfile
+ENV DATABASE_PASSWORD=secret123
+```
+
+Bad:
+
+```yaml
+environment:
+  DATABASE_PASSWORD: secret123
+```
+
+Instead, use:
+
+- Environment variables
+- Secret management systems
+- Cloud secret stores
+
+Examples include:
+
+- AWS Secrets Manager
+- Azure Key Vault
+- HashiCorp Vault
+
+## Use Environment Variables Carefully
+
+Environment variables are convenient but not completely secure.
+
+Example:
+
+```bash
+docker inspect my-container
+```
+
+may reveal configured variables.
+
+Treat environment variables as configuration, not as a secure vault.
+
+## Scan Images for Vulnerabilities
+
+Images should be scanned regularly.
+
+Docker Scout:
+
+```bash
+docker scout quickview
+```
+
+Inspect a specific image:
+
+```bash
+docker scout cves my-app:latest
+```
+
+Benefits:
+
+- Detect known vulnerabilities
+- Identify outdated dependencies
+- Improve compliance
+
+Security scanning should be part of every deployment pipeline.
+
+## Minimize Installed Software
+
+Every package increases the attack surface.
+
+Avoid:
+
+```dockerfile
+RUN apt install -y \
+    curl \
+    vim \
+    git \
+    wget \
+    nano
+```
+
+unless they are required.
+
+Install only what the application needs.
+
+Smaller images are:
+
+- Faster
+- Easier to maintain
+- More secure
+
+## Use Multi-Stage Builds
+
+Build tools are often unnecessary in production.
+
+Example:
+
+```dockerfile
+FROM node:20 AS builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
+
+Benefits:
+
+- Smaller runtime images
+- Fewer dependencies
+- Reduced attack surface
+
+## Restrict Network Exposure
+
+Expose only required ports.
+
+Example:
+
+```dockerfile
+EXPOSE 3000
+```
+
+Avoid exposing internal services publicly.
+
+Bad:
+
+```text
+Database Port Exposed
+```
+
+Better:
+
+```text
+API Exposed
+Database Internal Only
+```
+
+Use Docker networks to isolate services.
+
+## Use Read-Only Filesystems
+
+Some containers do not need write access.
+
+Example:
+
+```bash
+docker run --read-only my-app
+```
+
+Benefits:
+
+- Prevents unwanted file changes
+- Limits malware persistence
+- Reduces attack vectors
+
+## Restrict Resource Usage
+
+Containers should not consume unlimited resources.
+
+Example:
+
+```bash
+docker run \
+  --memory="512m" \
+  --cpus="1" \
+  my-app
+```
+
+Benefits:
+
+- Prevents resource exhaustion
+- Protects host stability
+- Reduces denial-of-service risks
+
+## Verify Images Before Deployment
+
+Inspect images:
+
+```bash
+docker image inspect my-app
+```
+
+Review:
+
+- Base image
+- Exposed ports
+- Labels
+- Configuration
+
+Understanding what is deployed is an important security practice.
+
+## Protect the Docker Socket
+
+One of the most sensitive resources is:
+
+```text
+/var/run/docker.sock
+```
+
+Avoid mounting it unless absolutely necessary.
+
+Dangerous:
+
+```bash
+docker run \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  my-app
+```
+
+Access to the Docker socket often means access to the host system.
+
+## Secure Docker Compose Files
+
+Review Compose configurations carefully.
+
+Avoid:
+
+```yaml
+privileged: true
+```
+
+Avoid unnecessary:
+
+```yaml
+network_mode: host
+```
+
+Avoid exposing sensitive services publicly.
+
+A secure Compose file should follow the principle of least privilege.
+
+## Monitor Container Activity
+
+Track:
+
+- Logs
+- Resource usage
+- Unexpected behavior
+
+Useful commands:
+
+```bash
+docker logs my-app
+```
+
+```bash
+docker stats
+```
+
+```bash
+docker inspect my-app
+```
+
+Monitoring helps identify security issues before they become incidents.
+
+## Security Checklist
+
+Before deploying a container:
+
+- Use trusted images
+- Pin image versions
+- Run as a non-root user
+- Scan for vulnerabilities
+- Use environment variables correctly
+- Protect secrets
+- Restrict ports
+- Limit resources
+- Minimize installed packages
+- Review Compose configurations
+
+## Common Security Mistakes
+
+### Using `latest`
+
+Avoid:
+
+```dockerfile
+FROM node:latest
+```
+
+Use explicit versions instead.
+
+### Running as Root
+
+Avoid unnecessary privileges.
+
+### Hardcoding Credentials
+
+Never store passwords in source code or Dockerfiles.
+
+### Exposing Databases Publicly
+
+Databases should usually remain on internal networks.
+
+### Ignoring Image Scans
+
+Unscanned images can contain known vulnerabilities.
+
+## Summary
+
+Container security is a shared responsibility between developers and operators.
+
+Key recommendations:
+
+- Use trusted images
+- Keep dependencies updated
+- Run containers as non-root users
+- Protect secrets
+- Scan images regularly
+- Limit permissions
+- Restrict network access
+- Monitor running containers
+
+Following these practices will significantly improve the security of your Docker-based applications.

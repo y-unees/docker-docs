@@ -1,0 +1,434 @@
+---
+title: Development Workflow with Docker
+description: Learn how to use Docker effectively during application development, testing, and deployment.
+order: 11
+---
+
+# Development Workflow with Docker
+
+Docker is not just a deployment tool.
+
+Many developers use Docker throughout the entire software development lifecycle, from writing code locally to deploying applications in production.
+
+A well-structured Docker workflow provides:
+
+- Consistent development environments
+- Easier onboarding
+- Simplified testing
+- Reduced deployment issues
+- Better team collaboration
+
+## A Typical Docker Workflow
+
+A common development workflow looks like this:
+
+```text
+Write Code
+    │
+    ▼
+Build Image
+    │
+    ▼
+Run Container
+    │
+    ▼
+Test Changes
+    │
+    ▼
+Commit Code
+    │
+    ▼
+Deploy
+```
+
+Docker helps ensure that each stage behaves consistently across environments.
+
+## Development vs Production Containers
+
+Development and production containers often have different requirements.
+
+### Development
+
+Focus on:
+
+- Fast iteration
+- Live reloading
+- Debugging
+- Source code access
+
+Example:
+
+```yaml
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+```
+
+Changes made on the host machine appear immediately inside the container.
+
+### Production
+
+Focus on:
+
+- Stability
+- Security
+- Performance
+- Immutable deployments
+
+Example:
+
+```yaml
+services:
+  app:
+    image: my-app:latest
+```
+
+Production containers should not rely on local source code mounts.
+
+## Using Bind Mounts
+
+Bind mounts are one of the most useful development features.
+
+Example:
+
+```yaml
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+```
+
+This maps:
+
+```text
+Host Project Directory
+         │
+         ▼
+Container /app Directory
+```
+
+When files change locally, the container immediately sees those changes.
+
+This is ideal for:
+
+- Node.js applications
+- Python applications
+- PHP applications
+- Frontend frameworks
+
+## Live Reloading
+
+Most modern frameworks support automatic reloads.
+
+Examples include:
+
+- Next.js
+- React
+- Vue
+- Express
+- Flask
+- FastAPI
+
+With source code mounted into the container:
+
+```yaml
+volumes:
+  - .:/app
+```
+
+the application can reload automatically whenever files change.
+
+This eliminates the need to rebuild the image after every modification.
+
+## Using .dockerignore
+
+When Docker builds an image, it sends files from the current directory to the Docker daemon.
+
+Some files should never be included.
+
+Create a `.dockerignore` file:
+
+```text
+node_modules
+.git
+.env
+dist
+coverage
+```
+
+Benefits:
+
+- Faster builds
+- Smaller build contexts
+- Improved security
+
+A well-maintained `.dockerignore` is just as important as a `.gitignore`.
+
+## Rebuilding Images
+
+Sometimes changes require rebuilding the image.
+
+Examples:
+
+- Updating dependencies
+- Modifying the Dockerfile
+- Installing new packages
+
+Rebuild the image:
+
+```bash
+docker compose build
+```
+
+Or rebuild and restart:
+
+```bash
+docker compose up --build
+```
+
+## Accessing Running Containers
+
+Sometimes debugging requires direct access.
+
+Open a shell:
+
+```bash
+docker compose exec app sh
+```
+
+Or:
+
+```bash
+docker compose exec app bash
+```
+
+depending on the image.
+
+This allows you to:
+
+- Inspect files
+- Check environment variables
+- Run commands manually
+- Debug issues
+
+## Viewing Logs
+
+Application logs are essential for troubleshooting.
+
+View logs:
+
+```bash
+docker compose logs
+```
+
+Follow logs:
+
+```bash
+docker compose logs -f
+```
+
+View logs for a specific service:
+
+```bash
+docker compose logs app
+```
+
+Monitoring logs should become part of your daily workflow.
+
+## Managing Dependencies
+
+One of Docker's biggest advantages is dependency consistency.
+
+Without Docker:
+
+```text
+Developer A → Node.js 20
+Developer B → Node.js 18
+Developer C → Node.js 16
+```
+
+Potential problems:
+
+- Build failures
+- Runtime errors
+- Inconsistent behavior
+
+With Docker:
+
+```text
+All Developers
+       │
+       ▼
+Same Container Environment
+```
+
+Every developer uses identical dependencies.
+
+## Running Tests Inside Containers
+
+Tests can run inside the same environment used in production.
+
+Example:
+
+```bash
+docker compose exec app npm test
+```
+
+Benefits:
+
+- Consistent test results
+- Reduced environment-specific issues
+- Easier CI/CD integration
+
+## Environment Variables
+
+Development environments often require configuration.
+
+Example:
+
+```env
+NODE_ENV=development
+DATABASE_URL=postgres://postgres:password@database:5432/app
+```
+
+Reference the file:
+
+```yaml
+services:
+  app:
+    env_file:
+      - .env
+```
+
+Avoid hardcoding configuration values whenever possible.
+
+## Working with Multiple Services
+
+Many applications require multiple containers.
+
+Example:
+
+```text
+Frontend
+    │
+    ▼
+Backend API
+    │
+    ▼
+Database
+```
+
+Docker Compose allows the entire stack to be started with a single command:
+
+```bash
+docker compose up
+```
+
+This significantly simplifies development.
+
+## Common Development Commands
+
+Start the application:
+
+```bash
+docker compose up
+```
+
+Run in background:
+
+```bash
+docker compose up -d
+```
+
+View running services:
+
+```bash
+docker compose ps
+```
+
+Open a shell:
+
+```bash
+docker compose exec app sh
+```
+
+View logs:
+
+```bash
+docker compose logs -f
+```
+
+Stop everything:
+
+```bash
+docker compose down
+```
+
+Rebuild images:
+
+```bash
+docker compose build
+```
+
+## Recommended Project Structure
+
+A typical project may look like:
+
+```text
+project/
+├── compose.yaml
+├── Dockerfile
+├── .dockerignore
+├── .env
+├── src/
+├── tests/
+└── README.md
+```
+
+Keeping Docker-related files organized makes projects easier to maintain.
+
+## Best Practices
+
+### Use Docker Compose
+
+Compose should be the default choice for local development.
+
+### Keep Containers Lightweight
+
+Avoid installing unnecessary tools and packages.
+
+### Rebuild Only When Necessary
+
+Use bind mounts for source code changes.
+
+Rebuild only when dependencies or Dockerfiles change.
+
+### Store Configuration Outside Code
+
+Use:
+
+- Environment variables
+- `.env` files
+- Secret management solutions
+
+### Match Production When Possible
+
+The closer development resembles production, the fewer surprises you'll encounter during deployment.
+
+## Summary
+
+Docker improves the development experience by creating consistent, reproducible environments.
+
+A good Docker development workflow includes:
+
+- Docker Compose
+- Bind mounts
+- Environment variables
+- Live reloading
+- Container-based testing
+- Proper image rebuilding strategies
+
+These practices help teams develop, test, and deploy applications more reliably and efficiently.

@@ -1,0 +1,455 @@
+---
+title: Dockerfile Best Practices
+description: Learn how to write efficient, secure, and maintainable Dockerfiles for production workloads.
+order: 13
+---
+
+# Dockerfile Best Practices
+
+Writing a Dockerfile is easy.
+
+Writing a Dockerfile that is efficient, secure, and production-ready requires a deeper understanding of how Docker images are built.
+
+This guide covers best practices that help:
+
+- Reduce image size
+- Improve build speed
+- Increase security
+- Simplify maintenance
+- Optimize deployments
+
+## Why Dockerfile Quality Matters
+
+A poorly written Dockerfile can lead to:
+
+- Large image sizes
+- Slow build times
+- Security vulnerabilities
+- Increased storage costs
+- Slower deployments
+
+Consider two images:
+
+```text
+Poorly Optimized Image
+├── Size: 1.5 GB
+└── Build Time: 5 minutes
+
+Optimized Image
+├── Size: 150 MB
+└── Build Time: 30 seconds
+```
+
+Small improvements can have a significant impact.
+
+## Use Specific Base Images
+
+Avoid:
+
+```dockerfile
+FROM node:latest
+```
+
+The `latest` tag changes over time and can introduce unexpected behavior.
+
+Prefer:
+
+```dockerfile
+FROM node:20
+```
+
+Or even:
+
+```dockerfile
+FROM node:20-alpine
+```
+
+Benefits:
+
+- Predictable builds
+- Easier debugging
+- Better reproducibility
+
+## Choose Lightweight Images
+
+Many official images provide smaller variants.
+
+Example:
+
+```dockerfile
+FROM node:20-alpine
+```
+
+Compared to:
+
+```dockerfile
+FROM node:20
+```
+
+Alpine-based images are significantly smaller and often ideal for production workloads.
+
+Popular lightweight options:
+
+- Alpine Linux
+- Distroless Images
+- Slim Variants
+
+## Leverage Layer Caching
+
+Docker builds images layer by layer.
+
+Example:
+
+```dockerfile
+COPY . .
+RUN npm install
+```
+
+This forces Docker to reinstall dependencies every build.
+
+A better approach:
+
+```dockerfile
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+```
+
+Now dependencies are only reinstalled when package files change.
+
+Benefits:
+
+- Faster builds
+- Improved CI/CD performance
+- Reduced development time
+
+## Minimize Layers
+
+Each Docker instruction creates a new layer.
+
+Avoid:
+
+```dockerfile
+RUN apt update
+
+RUN apt install -y curl
+
+RUN apt install -y git
+```
+
+Prefer:
+
+```dockerfile
+RUN apt update && \
+    apt install -y curl git
+```
+
+This reduces image complexity and size.
+
+## Use .dockerignore
+
+Docker sends files from the build directory to the daemon.
+
+Some files should never be included.
+
+Example:
+
+```text
+node_modules
+.git
+.env
+coverage
+dist
+```
+
+Create:
+
+```text
+.dockerignore
+```
+
+Example:
+
+```gitignore
+node_modules
+.git
+.env
+coverage
+dist
+```
+
+Benefits:
+
+- Smaller build context
+- Faster builds
+- Improved security
+
+## Avoid Running as Root
+
+By default, containers run as the root user.
+
+Avoid:
+
+```dockerfile
+FROM node:20
+
+CMD ["node", "server.js"]
+```
+
+Instead:
+
+```dockerfile
+FROM node:20
+
+USER node
+
+CMD ["node", "server.js"]
+```
+
+Benefits:
+
+- Reduced attack surface
+- Better security posture
+- Compliance with container security standards
+
+## Use Multi-Stage Builds
+
+Multi-stage builds separate build dependencies from runtime dependencies.
+
+Example:
+
+```dockerfile
+FROM node:20 AS builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+```
+
+Benefits:
+
+- Smaller images
+- Cleaner runtime environments
+- Reduced security risks
+
+This is one of the most important Docker optimization techniques.
+
+## Keep Images Immutable
+
+Containers should not modify application code after startup.
+
+Avoid:
+
+```dockerfile
+RUN git clone https://example.com/project.git
+```
+
+during runtime.
+
+Instead:
+
+- Build the application beforehand
+- Package everything into the image
+
+Images should be self-contained and reproducible.
+
+## Use COPY Instead of ADD
+
+Docker provides two instructions:
+
+```dockerfile
+COPY
+ADD
+```
+
+Prefer:
+
+```dockerfile
+COPY . .
+```
+
+Use `ADD` only when its advanced features are required.
+
+For most use cases, `COPY` is simpler and more predictable.
+
+## Expose Only Required Ports
+
+Avoid exposing unnecessary services.
+
+Example:
+
+```dockerfile
+EXPOSE 3000
+```
+
+Only expose ports that the application genuinely needs.
+
+## Use Environment Variables
+
+Avoid hardcoding configuration values.
+
+Instead:
+
+```dockerfile
+ENV NODE_ENV=production
+```
+
+Or inject values during runtime:
+
+```bash
+docker run -e NODE_ENV=production my-app
+```
+
+This makes images more reusable.
+
+## Keep One Process Per Container
+
+A container should generally run one primary process.
+
+Good:
+
+```text
+Container A → API
+Container B → Database
+Container C → Redis
+```
+
+Avoid:
+
+```text
+Container
+├── API
+├── Database
+├── Redis
+└── Nginx
+```
+
+Smaller, focused containers are easier to maintain and scale.
+
+## Add Metadata
+
+Labels provide useful metadata.
+
+Example:
+
+```dockerfile
+LABEL maintainer="team@example.com"
+LABEL version="1.0"
+LABEL description="Example API"
+```
+
+This can help with image management and automation.
+
+## Scan Images Regularly
+
+Even official images may contain vulnerabilities.
+
+Inspect images:
+
+```bash
+docker scout quickview
+```
+
+Or:
+
+```bash
+docker scan my-app
+```
+
+Regular security reviews should be part of your workflow.
+
+## Example Production Dockerfile
+
+Node.js application:
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci --only=production
+
+COPY . .
+
+USER node
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+This Dockerfile follows several best practices:
+
+- Lightweight base image
+- Layer caching
+- Non-root user
+- Minimal dependencies
+- Predictable runtime behavior
+
+## Common Mistakes
+
+### Using latest Tags
+
+Avoid:
+
+```dockerfile
+FROM node:latest
+```
+
+### Copying Everything
+
+Avoid:
+
+```dockerfile
+COPY . .
+```
+
+without a proper `.dockerignore`.
+
+### Running as Root
+
+Avoid unnecessary privileges.
+
+### Large Images
+
+Use lightweight base images whenever possible.
+
+### Storing Secrets
+
+Never embed:
+
+- Passwords
+- API keys
+- Tokens
+
+inside Dockerfiles.
+
+Use environment variables or secret management solutions instead.
+
+## Summary
+
+A well-designed Dockerfile leads to faster builds, smaller images, and more secure deployments.
+
+Key recommendations:
+
+- Use specific image versions
+- Choose lightweight base images
+- Leverage build caching
+- Create a `.dockerignore`
+- Run containers as non-root users
+- Use multi-stage builds
+- Keep images immutable
+- Avoid embedding secrets
+
+Following these practices will help you create production-ready Docker images that are easier to maintain, deploy, and secure.

@@ -1,0 +1,153 @@
+---
+title: Building and Running Containers
+description: Learn how to build Docker images and launch containers from them.
+order: 7
+---
+
+# Building and Running Containers
+
+Once you've written a Dockerfile, the next step is building an image and running a container from it.
+
+## Build an Image
+
+Use the following command:
+
+```bash
+docker build -t my-app:v1 .
+```
+
+Explanation:
+
+| Option  | Description       |
+| ------- | ----------------- |
+| `build` | Build an image    |
+| `-t`    | Assign a tag      |
+| `.`     | Current directory |
+
+Verify the image exists:
+
+```bash
+docker images
+```
+
+Example output:
+
+```text
+REPOSITORY   TAG   IMAGE ID
+my-app       v1    abc123
+```
+
+## Run a Container
+
+Launch a container:
+
+```bash
+docker run my-app:v1
+```
+
+Docker creates a new container from the image.
+
+## Port Mapping
+
+Most web applications require port forwarding.
+
+Example:
+
+```bash
+docker run -p 8080:3000 my-app:v1
+```
+
+This maps:
+
+```text
+Host Port      Container Port
+8080     ->    3000
+```
+
+You can now access the application at:
+
+```text
+http://localhost:8080
+```
+
+## Detached Mode
+
+Run containers in the background:
+
+```bash
+docker run -d my-app:v1
+```
+
+Docker returns a container ID.
+
+View running containers:
+
+```bash
+docker ps
+```
+
+## Naming Containers
+
+Assign a friendly name:
+
+```bash
+docker run --name web-app my-app:v1
+```
+
+Instead of using container IDs, you can reference the container by name.
+
+## Stopping Containers
+
+Stop a running container:
+
+```bash
+docker stop web-app
+```
+
+## Removing Containers
+
+Delete a container:
+
+```bash
+docker rm web-app
+```
+
+Remove all stopped containers:
+
+```bash
+docker container prune
+```
+
+## Viewing Logs
+
+Display container output:
+
+```bash
+docker logs web-app
+```
+
+Follow logs in real time:
+
+```bash
+docker logs -f web-app
+```
+
+## Executing Commands Inside Containers
+
+Open a shell:
+
+```bash
+docker exec -it web-app sh
+```
+
+Or:
+
+```bash
+docker exec -it web-app bash
+```
+
+depending on the image.
+
+## Summary
+
+Building images and running containers are the two most common Docker operations. Mastering these commands forms the foundation of daily Docker usage.

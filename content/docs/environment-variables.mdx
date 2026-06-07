@@ -1,0 +1,376 @@
+---
+title: Environment Variables
+description: Learn how to manage application configuration using environment variables in Docker and Docker Compose.
+order: 12
+---
+
+# Environment Variables
+
+Environment variables provide a flexible way to configure applications without modifying source code.
+
+Instead of hardcoding values directly into your application, you can store configuration separately and inject it at runtime.
+
+Common examples include:
+
+- Database connection strings
+- API keys
+- Application ports
+- Environment modes
+- Feature flags
+
+## Why Use Environment Variables?
+
+Consider this example:
+
+```javascript
+const databaseUrl =
+  "postgres://admin:password123@localhost:5432/app";
+```
+
+This approach has several problems:
+
+- Credentials are exposed in source code
+- Configuration changes require code changes
+- Different environments need different values
+
+A better approach:
+
+```javascript
+const databaseUrl = process.env.DATABASE_URL;
+```
+
+Now the application can run in different environments without modifying code.
+
+## Setting Environment Variables with Docker
+
+You can pass variables directly when starting a container.
+
+Example:
+
+```bash
+docker run \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  my-app
+```
+
+Inside the container:
+
+```text
+NODE_ENV=production
+PORT=3000
+```
+
+The application can access these values at runtime.
+
+## Viewing Environment Variables
+
+To inspect a container's environment variables:
+
+```bash
+docker exec -it my-container env
+```
+
+This displays all available environment variables.
+
+## Using Environment Variables in Docker Compose
+
+Docker Compose makes environment variable management easier.
+
+Example:
+
+```yaml
+services:
+  app:
+    image: my-app
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+```
+
+Start the application:
+
+```bash
+docker compose up
+```
+
+The variables become available inside the container.
+
+## Using a .env File
+
+For larger projects, storing variables in a separate file is preferred.
+
+Create a file named:
+
+```text
+.env
+```
+
+Example:
+
+```env
+NODE_ENV=development
+PORT=3000
+DATABASE_URL=postgres://admin:password@database:5432/app
+```
+
+Reference it from Compose:
+
+```yaml
+services:
+  app:
+    env_file:
+      - .env
+```
+
+Docker Compose automatically loads the values.
+
+## Example Project Structure
+
+```text
+project/
+├── compose.yaml
+├── Dockerfile
+├── .env
+└── src/
+```
+
+This keeps configuration separate from application code.
+
+## Variable Substitution in Compose
+
+Docker Compose can substitute values directly.
+
+Example:
+
+```yaml
+services:
+  app:
+    ports:
+      - "${PORT}:3000"
+```
+
+Environment file:
+
+```env
+PORT=8080
+```
+
+Docker Compose expands the value automatically.
+
+Result:
+
+```text
+8080:3000
+```
+
+This is useful when different developers require different settings.
+
+## Default Values
+
+You can provide fallback values.
+
+Example:
+
+```yaml
+services:
+  app:
+    ports:
+      - "${PORT:-3000}:3000"
+```
+
+If `PORT` is not defined:
+
+```text
+3000:3000
+```
+
+is used automatically.
+
+## Environment Variables and Databases
+
+A common pattern is database configuration.
+
+Example:
+
+```env
+POSTGRES_DB=myapp
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=secret
+```
+
+Compose file:
+
+```yaml
+services:
+  database:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+```
+
+This keeps credentials outside the Compose configuration.
+
+## Application Environments
+
+Many applications support environment-specific configurations.
+
+Typical values include:
+
+### Development
+
+```env
+NODE_ENV=development
+```
+
+### Testing
+
+```env
+NODE_ENV=test
+```
+
+### Production
+
+```env
+NODE_ENV=production
+```
+
+Applications can adjust behavior based on these values.
+
+## Security Considerations
+
+Environment variables are convenient but should not be treated as highly secure storage.
+
+Avoid committing sensitive files:
+
+```text
+.env
+.env.local
+.env.production
+```
+
+Add them to `.gitignore`:
+
+```gitignore
+.env
+.env.local
+.env.production
+```
+
+This prevents accidental exposure in version control.
+
+## Example: Node.js
+
+Reading an environment variable:
+
+```javascript
+const port = process.env.PORT || 3000;
+
+app.listen(port);
+```
+
+Running the container:
+
+```bash
+docker run -e PORT=8080 my-app
+```
+
+The application now listens on port 8080.
+
+## Example: Python
+
+Reading an environment variable:
+
+```python
+import os
+
+port = os.getenv("PORT", 3000)
+```
+
+This pattern works well across Dockerized applications.
+
+## Best Practices
+
+### Never Hardcode Secrets
+
+Avoid:
+
+```text
+API_KEY=123456789
+```
+
+inside source code.
+
+Use environment variables instead.
+
+### Use .env Files for Development
+
+This simplifies local configuration.
+
+### Keep Environment-Specific Values Separate
+
+Different environments often require different configurations.
+
+Examples:
+
+```text
+.env.development
+.env.staging
+.env.production
+```
+
+### Validate Required Variables
+
+Applications should fail fast if critical configuration is missing.
+
+Examples:
+
+- Database URLs
+- Authentication secrets
+- API credentials
+
+### Avoid Committing Sensitive Files
+
+Always review your `.gitignore`.
+
+## Common Commands
+
+Run with environment variables:
+
+```bash
+docker run -e PORT=3000 my-app
+```
+
+View container variables:
+
+```bash
+docker exec -it my-container env
+```
+
+Start Compose services:
+
+```bash
+docker compose up
+```
+
+Recreate services after configuration changes:
+
+```bash
+docker compose up -d --force-recreate
+```
+
+## Summary
+
+Environment variables are the standard way to configure Dockerized applications.
+
+Key benefits include:
+
+- Separation of configuration from code
+- Easier deployment across environments
+- Improved maintainability
+- Better security practices
+- Seamless integration with Docker Compose
+
+Most production-ready Docker applications rely heavily on environment variables for configuration management.
